@@ -2,9 +2,12 @@ package ru.topbun.model.category
 
 import io.ktor.http.*
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.topbun.model.recipe.Recipes.getRecipeWithId
 import ru.topbun.model.recipe.Recipes.title
@@ -37,13 +40,13 @@ object Categories : IntIdTable("Categories") {
     fun selectAllCategories(q: String, offset: Int, limit: Int) = transaction {
         selectAll()
             .limit(n = limit, offset = offset.toLong())
-            .where{name.lowerCase() like "%${q.lowercase()}%" }
+            .where{name like "%$q%" }
             .map{ it.toCategory() }
             .distinctBy { it.name }
     }
 
     fun selectCategory(id: Int) = transaction {
-        selectAll().where(RecipeToCategories.id eq id).firstOrNull()?.toCategory() ?: throw AppException(HttpStatusCode.NotFound, Error.CATEGORY_NOT_FOUND)
+        selectAll().where(Categories.id eq id).firstOrNull()?.toCategory() ?: throw AppException(HttpStatusCode.NotFound, Error.CATEGORY_NOT_FOUND)
     }
 
     private fun ResultRow.toCategory(): CategoryDTO {

@@ -12,12 +12,12 @@ import ru.topbun.utills.createError
 fun Application.configureCategoryRouting(){
     routing {
         authenticate {
-            post("/category") {
+            post("/category/add") {
                 val categoryController = CategoryController(call)
                 categoryController.addCategory()
             }
         }
-        get("/category") {
+        post("/category") {
             val categoryController = CategoryController(call)
             categoryController.getCategories()
         }
